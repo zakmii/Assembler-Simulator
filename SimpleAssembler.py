@@ -47,13 +47,13 @@ for line in instructions:                   #reading file line by line
 def type(pc,l):
     if l.split()[0] in opcodeA.keys():
         return opcodeA
-    elif l.split()[0].strip() in opcodeB.keys():
-        if l.split()[0].strip()=="mov" and len(l.split())!=3:
+    if l.split()[0] in opcodeB.keys():
+        if l.split()[0]=="mov" and len(l.split())!=3:
             print("Line No:" +str(iln[0])+" Instruction is Invalid")
             sys.exit()
         elif l.split()[2][0]=="$":
             return opcodeB
-    elif l.split()[0].strip() in opcodeC.keys():
+    if l.split()[0] in opcodeC.keys():
         return opcodeC
     elif l.split()[0] in opcodeD.keys():
         return opcodeD
@@ -197,7 +197,7 @@ for iln in instruction_line_no: #printing
             if(len(i)!=3):
                 print(f"Line no {no}: Invalid format")
                 sys.exit()
-            elif((i[1] not in reg.keys()) or (i[2] not in reg.keys())):
+            if((i[1] not in reg.keys()) or (i[2] not in reg.keys())):
                 print(f"Line no {no}: Invalid Registers")
                 sys.exit()
             else:
