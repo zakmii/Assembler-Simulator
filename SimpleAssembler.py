@@ -7,8 +7,61 @@ def binary(x):                      #function to convert decimal to 8 bit binary
     while(len(s)<8):
         s="0"+s
     return s
-opcodeA={"add":"10000","sub":"10001","mul":"10110","xor":"11010","or":"11011","and":"11100"} #opcodes with value as their binary code
-opcodeB={"rs":"11000","ls":"11001","mov":"10010"}
+
+def is_num(s):
+    try:
+        float(s)
+    except ValueError:
+        return False
+    else:
+        return True
+
+def get_exp(s):
+    s=float(s)
+    s=int(s)
+    x=bin(s)
+    x=x[2::]
+    n=len(x)
+    n=n-1
+    k=bin(n)
+    k=k[2::]
+    while(len(k)<3):
+        k="0"+str(k)
+    return k
+
+def get_mantissa(dec, prec) :
+    binary = ""
+    dec=float(dec)
+    int_part = int(dec)
+    frac_part = dec - int_part
+    while (int_part) : 
+        rem = int_part % 2
+        binary += str(rem)
+        int_part = int_part//2
+    binary = binary[ : : -1]
+    binary += '.'
+    while (prec) :  
+        frac_part = frac_part*2
+        fract_bit = int(frac_part)
+        if (fract_bit == 1) :
+            frac_part -= fract_bit
+            binary += '1'
+        else :
+            binary += '0'
+        prec-=1
+    binary_without_point=binary.replace(".","")
+    return binary_without_point[1:6:]
+
+def get_fp(s):
+    ans=get_exp(s)+get_mantissa(s,5)
+    return ans
+
+# def dec_to_fp(x):
+#     x=float(x)
+
+
+opcodeA={"add":"10000","sub":"10001","mul":"10110","xor":"11010","or":"11011","and":"11100","addf":"00000","subf":"00001"} #opcodes with value as their binary code
+opcodeB={"rs":"11000","ls":"11001","mov":"10010","movf":"00010"}
 opcodeC={"mov":"10011","div":"10111","not":"11101","cmp":"11110"}
 opcodeD={"ld":"10100","st":"10101"}
 opcodeE={"jmp":"11111","jlt":"01100","jgt":"01101","je":"01111"}
@@ -133,11 +186,11 @@ for i in range(0,len(temp)-1):
         tempo=tempo[(tempo.find(":")+2):]
         if tempo!="":
             if tempo.split()[0]=="hlt":
-                print("Halt used before last line")
+                print(f"Line no: {no} Halt used before last line")
                 sys.exit()
     if tempo!="":
             if tempo.split()[0]=="hlt":
-                print("Halt used before last line")
+                print(f"Line no: {no} Halt used before last line")
                 sys.exit()
 
 #flag checker
@@ -185,12 +238,20 @@ for iln in instruction_line_no: #printing
             elif(i[1] not in reg.keys()):
                 print(f"Line no {no}: Invalid register")
                 sys.exit()
-            elif(not i[2][1:].isnumeric() or float(i[2][1:])>255 or float(i[2][1:])<0):
+            elif(i[0]!="movf" and (not i[2][1:].isnumeric() or float(i[2][1:])>255 or float(i[2][1:])<0)):
+            # elif(not is_num(i[2][1:]) or float(i[2][1:])>255 or float(i[2][1:])<0):
                 print(f"Line no {no}: Invalid Number")
                 sys.exit()
+            elif(i[0]=="movf" and (float(i[2][1:])>252 or float(i[2][1:])<1)):
+                print(f"Line no {no}: Invalid Number")
+                sys.exit()
+            
             else:
                 s+=opcodeB[i[0]]+reg[i[1]]
-                s+=binary(int(i[2][1:]))
+                if(i[0]!="movf"):
+                    s+=binary(int(i[2][1:]))
+                else:
+                    s+=get_fp(i[2][1:])
                 final.append(s)
         elif type(line,i)==opcodeC:
             i=i.split()
